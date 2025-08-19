@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  name         String
+  email        String     @unique
+  password     String
+  role         Role
+  department   Department? @relation(fields: [departmentId], references: [id])
+  departmentId Int?
+  questions    Question[]
+}
+
+model Department {
+  id         Int        @id @default(autoincrement())
+  name       String     @unique
+  users      User[]
+  questions  Question[]
+  faqs       FAQ[]
+}
+
+model Question {
+  id           Int        @id @default(autoincrement())
+  content      String
+  answer       String?
+  user         User       @relation(fields: [userId], references: [id])
+  userId       Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId Int
+  createdAt    DateTime   @default(now())
+  answers      Answer[]
+}
+
+model Answer {
+  id          Int      @id @default(autoincrement())
+  questionId  Int
+  answerText  String
+  answeredBy  String
+  createdAt   DateTime @default(now())
+
+  question    Question @relation(fields: [questionId], references: [id])
+}
+
+model FAQ {
+  id           Int        @id @default(autoincrement())
+  question     String
+  answer       String
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId Int
+}
+
+enum Role {
+  student
+  dept_admin
+  admin
+}
